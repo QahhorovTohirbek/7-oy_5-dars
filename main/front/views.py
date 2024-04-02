@@ -23,9 +23,15 @@ def index(request):
 
 def add_cart(request, code):
     product = models.Product.objects.get(code=code)
-    cart , _ = models.Cart.objects.get_or_create(user=request.user, is_active=True)
-    cart_product , _ = models.CartProduct.objects.get_or_create(cart=cart, product=product, count=1)
-    cart_product.save()
+    cart, _ = models.Cart.objects.get_or_create(user=request.user, is_active=True)
+    
+    try:
+        cart_product = models.CartProduct.objects.get(cart=cart, product=product)
+        cart_product.count += 1
+        cart_product.save()
+    except models.CartProduct.DoesNotExist:
+        cart_product = models.CartProduct.objects.create(cart=cart, product=product, count=1)
+
     return redirect('front:index')
 
 def remove_cart(request, code):
@@ -44,20 +50,19 @@ def remove_cart(request, code):
 def update_quantity(request, code):
     if request.method == 'POST':
         product = models.Product.objects.get(code=code)
-        quantity = int(request.POST.get('quantity', 0))
         action = request.POST.get('action')
         cart, _ = models.Cart.objects.get_or_create(user=request.user, is_active=True)
         
         cart_product = models.CartProduct.objects.filter(cart=cart, product=product).first()
-        
-        if not cart_product:
-            cart_product = models.CartProduct.objects.create(cart=cart, product=product, count=0)
 
         if action == 'increase':
             cart_product.count += 1
         elif action == 'decrease':
             if cart_product.count > 1:
                 cart_product.count -= 1
+            else:
+                cart_product.delete()
+                return redirect('front:active_cart')
 
         cart_product.save()
 
