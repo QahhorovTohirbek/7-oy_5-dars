@@ -21,4 +21,10 @@ urlpatterns = [
     path('product-img-delete/<int:id>/', views.product_img_delete,name='product_img_delete'),
     path('product-video-delete/<int:id>/', views.product_video_delete,name='product_video_delete'),
 
+    #-------ENTER-PRODUCT------------
+    path('enter-product/', views.enter_product, name='enter_product'),
+    path('enter-product-list/<str:code>/', views.enter_product_list, name='enter_product_list'),
+    path('product-history/<str:code>/', views.product_history, name='product_history'),
+    
+
 ]

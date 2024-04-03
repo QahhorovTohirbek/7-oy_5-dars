@@ -58,7 +58,12 @@ class Product(CodeGenerate):
     quantity = models.IntegerField() 
     delivery = models.BooleanField(default=False)
     
+    def __str__(self):
+        return f'{self.name}'
 
+
+    def stoct_status(self):
+        return bool(self.quantity)
 
 
 class ProductImg(models.Model):
@@ -131,6 +136,13 @@ class CartProduct(models.Model):
     count = models.IntegerField()
 
     @property
+    def created_at(self):
+        date = self.cart.order_date
+        if date:
+            return date
+        return None
+
+    @property
     def price(self):
         count = self.count * self.product.price
         return count
@@ -139,3 +151,33 @@ class CartProduct(models.Model):
 class WishList(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return f'{self.user.username}, {self.product.name}'
+    
+    def save(self, *args, **kwargs):
+        if WishList.objects.filter(user=self.user, product=self.product).count():
+            raise ValueError('Dual')
+        super(WishList, self).save(*args, **kwargs)
+
+
+
+class EnterProduct(CodeGenerate):
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    quantity = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return f'{self.product.name}'
+    
+    def save(self, *args, **kwargs):
+        if self.pk:
+            object = EnterProduct.objects.get(id=self.id)
+            self.product.quantity -= object.quantity
+                        
+        self.product.quantity+=self.quantity
+        self.product.save()
+
+        super(EnterProduct, self).save(*args, **kwargs)
+
+        

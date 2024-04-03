@@ -148,10 +148,19 @@
                                                 <div class="product-add-action">
                                                     <ul>
                                                         <li>
-                                                            <a href="wishlist.html" data-tippy="Add to wishlist" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="sharpborder">
-                                                                <i class="pe-7s-like"></i>
+                                                            {% for w in wishlist %}
+                                                            {% if product.code == w.product.code %}
+                                                            <a href="{% url 'front:remove_wishlist' product.code %}" data-tippy="Remove from wishlist" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="sharpborder">
+                                                                <i class="fa fa-heart"></i>
                                                             </a>
-                                                        </li>
+                                                            {% else %}
+                                                                <a href="{% url 'front:add_wishlist' product.code %}" data-tippy="Add to wishlist" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="sharpborder">
+                                                                    <i class="pe-7s-like"></i>
+                                                                </a>
+                                                            {% endif %}
+                                                            {% endfor %}
+                                                            </li>
+
                                                         <li class="quuickview-btn">
                                                             <a href="{% url 'front:product_detail' product.code %}">
                                                                 <i class="pe-7s-look"></i>

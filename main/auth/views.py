@@ -72,4 +72,4 @@ def profile(request):
 def carts(request):
     queryset = models.Cart.objects.filter(user=request.user, is_active=False)
     context = {'queryset':queryset}
-    return render(request, 'front/carts/list.html')
+    return render(request, 'front/carts/list.html', context)
