@@ -148,8 +148,7 @@
                                                 <div class="product-add-action">
                                                     <ul>
                                                         <li>
-                                                            {% for w in wishlist %}
-                                                            {% if product.code == w.product.code %}
+                                                            {% if product == wishlist.product %}
                                                             <a href="{% url 'front:remove_wishlist' product.code %}" data-tippy="Remove from wishlist" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="sharpborder">
                                                                 <i class="fa fa-heart"></i>
                                                             </a>
@@ -158,9 +157,8 @@
                                                                     <i class="pe-7s-like"></i>
                                                                 </a>
                                                             {% endif %}
-                                                            {% endfor %}
                                                             </li>
-
+                                                            
                                                         <li class="quuickview-btn">
                                                             <a href="{% url 'front:product_detail' product.code %}">
                                                                 <i class="pe-7s-look"></i>

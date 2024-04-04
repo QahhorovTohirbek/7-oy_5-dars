@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect
 from main import models
 from main.funcs import staff_required
 
-
 @staff_required
 def index(request):
     context = {}
@@ -175,25 +174,58 @@ def product_video_delete(request, id):
     product_video.delete()
     return redirect('dashboard:product_update',product_video.product_id)
 
-
+#-------ENTER_PRODUCT-----------
 @staff_required
-def enter_product(request):
+def create_enter_product(request):
+    products = models.Product.objects.all()
     if request.method == 'POST':
-        product = models.Product.objects.get(code=request.POST['code'])
-        quantity = request.POST['quantity']
+        # Get product and quantity, handling potential errors
+        product = request.POST.get('code')
+        quantity = request.POST.get('quantity')
+
+        # Validate product code and quantity
+        if not product or not quantity:
+            return redirect('dashboard:create_enter_product')
+
+        try:
+            product = models.Product.objects.get(code=product)
+            quantity = int(quantity)
+        except (models.ObjectDoesNotExist, ValueError):
+            return redirect('dashboard:create_enter_product')
+
+        # Create enter product record on success
         models.EnterProduct.objects.create(
             product=product,
             quantity=quantity
         )
-        return redirect()
-    return render(request, 'dashboard/product/enter.html')
+        return redirect('dashboard:list_enter_product')
+
+    context = {'products': products}
+    return render(request, 'dashboard/product/enter_product_create.html', context)
+
+
+
+@staff_required 
+def update_enter_product(request, code):
+    enter_product = models.EnterProduct.objects.get(code=code)
+    products = models.Product.objects.all()
+    context = {
+        'enter_product':enter_product,
+        'products':products
+    }
+    if request.method == 'POST':
+        enter_product.quantity = request.POST.get('quantity') 
+        enter_product.date = request.POST.get('date') 
+        enter_product.save()
+        return redirect('dashboard:list_enter_product')
+    return render(request, 'dashboard/product/enter_product_update.html', context)
 
 
 @staff_required
-def enter_product_list(request):
+def list_enter_product(request):
     queryset = models.EnterProduct.objects.all()
     context = {'queryset':queryset}
-    return render(request, 'dashboard/product/enter_list.html', context)
+    return render(request, 'dashboard/product/enter_product_list.html', context)
 
 
 @staff_required
@@ -203,4 +235,4 @@ def product_history(request,code):
     history = queryset.union(outs)
     date = sorted(history, key=lambda x: x.created_at)
     context = {'history':date}
-    return render(request, 'dashboard/product/history.html', context)
+    return render(request, 'dashboard/product/enter_product_history.html', context)

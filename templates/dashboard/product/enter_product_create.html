@@ -24,9 +24,9 @@
                         <div class="form-group row">
                             <label for="inputPassword3" class="col-sm-2 col-form-label">Product</label>
                             <div class="col-sm-10">
-                                <select name="product_id" class="form-control">
-                                    {% for p in product %}
-                                    <option value="{{p.code}}">{{p.name}}</option>
+                                <select name="code" class="form-control">
+                                    {% for product in products %}
+                                    <option value="{{product.code}}">{{product.name}}</option>
                                     {% endfor %}
                                 </select>
                             </div>

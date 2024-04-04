@@ -158,17 +158,20 @@ def wishlist(request):
     return render(request, 'front/wishlist/list.html', context)
 
 
+
 @login_required(login_url='auth:login')
 def add_wishlist(request, code):
-    product = models.Product.objects.get(code=code)
-    wishlist = models.WishList.objects.create(product=product,user=request.user)
-    wishlist.save()
+    product = get_object_or_404(models.Product, code=code)
+    wishlist = models.WishList.objects.filter(product=product, user=request.user)
+    if models.WishList.objects.filter(product=product, user=request.user).exists():
+        wishlist.delete()
+    else:
+        wishlist = models.WishList.objects.create(product=product, user=request.user)
     return redirect('front:wishlist')
-
-
 
 @login_required(login_url='auth:login')
 def remove_wishlist(request, code):
-    wishlist = models.WishList.objects.get(product__code = code, user=request.user)
+    wishlist = get_object_or_404(models.WishList, product__code=code, user=request.user)
     wishlist.delete()
     return redirect('front:wishlist')
+

@@ -152,13 +152,19 @@ class WishList(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
 
+    class Meta:
+        unique_together = ('user', 'product')  # Enforces uniqueness at the database level
+
+
     def __str__(self) -> str:
         return f'{self.user.username}, {self.product.name}'
     
     def save(self, *args, **kwargs):
-        if WishList.objects.filter(user=self.user, product=self.product).count():
-            raise ValueError('Dual')
-        super(WishList, self).save(*args, **kwargs)
+        existing_entry = WishList.objects.filter(user=self.user, product=self.product).first()
+        if existing_entry:
+            existing_entry.delete()
+
+        super().save(*args, **kwargs)
 
 
 
