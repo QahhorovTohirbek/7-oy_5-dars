@@ -13,6 +13,14 @@ def index(request):
     products = models.Product.objects.all()
     wishlist = models.WishList.objects.filter(user=request.user)
     reviews = models.Review.objects.all()
+    result = []
+    for product in products:
+        data = models.WishList.objects.filter(product=product, user=request.user)
+        if data:
+            product.liked = True
+        else:
+            product.liked = False
+        result.append(product)
 
 
     mark = 0
@@ -22,7 +30,7 @@ def index(request):
     mark = int(mark/len(reviews)) if reviews else 0
     context = {
         'categories':categories,
-        'products':products,
+        'products':result,
         'wishlist':wishlist,
         'rating':range(1,6),
         'mark':mark,
@@ -30,11 +38,11 @@ def index(request):
 
     return render(request, 'front/index.html', context)
 
-
+#---------Cart_section------------
 @login_required(login_url='auth:login')
 def add_cart(request, code):
     product = models.Product.objects.get(code=code)
-    cart, _ = models.Cart.objects.get_or_create(user=request.user, is_active=True)
+    cart, _ = models.Cart.objects.get_or_create(user=request.user, status=1)
     
     try:
         cart_product = models.CartProduct.objects.get(cart=cart, product=product)
@@ -49,7 +57,7 @@ def add_cart(request, code):
 @login_required(login_url='auth:login')
 def remove_cart(request, code):
     if request.method == 'GET':
-        cart = get_object_or_404(models.Cart, user=request.user, is_active=True)
+        cart = get_object_or_404(models.Cart, user=request.user, status=4)
         product = get_object_or_404(models.Product, code=code)
 
         cart_products = models.CartProduct.objects.filter(cart=cart, product=product)
@@ -65,7 +73,7 @@ def update_quantity(request, code):
     if request.method == 'POST':
         product = models.Product.objects.get(code=code)
         action = request.POST.get('action')
-        cart, _ = models.Cart.objects.get_or_create(user=request.user, is_active=True)
+        cart, _ = models.Cart.objects.get_or_create(user=request.user, status=1)
         
         cart_product = models.CartProduct.objects.filter(cart=cart, product=product).first()
 
@@ -83,48 +91,17 @@ def update_quantity(request, code):
         return redirect('front:active_cart')
 
 
-@login_required(login_url='auth:login')
-def product_detail(request,code):
-    product = models.Product.objects.get(code=code)
-    reviews = models.Review.objects.filter(product=product)
-    images = models.ProductImg.objects.filter(product=product)
-    mark = 0
-
-    for i in reviews:
-        mark += i.mark
-
-    mark = int(mark/len(reviews)) if reviews else 0
-    context = {
-        'product':product,
-        'mark':mark,
-        'rating':range(1,6),
-        'images':images,
-        'reviews':reviews,
-    }
-    return render(request, 'front/product/detail.html',context)
-
-
-@login_required(login_url='auth:login')
-def product_list(request,code):
-    queryset = models.Product.objects.filter(category__code=code)
-    categories = models.Category.objects.all()
-    context = {
-        'queryset':queryset,
-        'categories':categories,
-        }
-    return render(request, 'front/category/product_list.html',context)
-
 
 @login_required(login_url='auth:login')
 def carts(request):
-    queryset = models.Cart.objects.filter(user=request.user, is_active=False)
+    queryset = models.Cart.objects.filter(user=request.user, status__in=[2,3,4])
     context = {'queryset':queryset}
     return render(request, 'front/carts/list.html', context)
 
 
 @login_required(login_url='auth:login')
 def active_cart(request):
-    queryset , _ = models.Cart.objects.get_or_create(user=request.user, is_active=True)
+    queryset , _ = models.Cart.objects.get_or_create(user=request.user, status=1)
     return redirect('front:cart_detail', queryset.code)
 
 
@@ -139,16 +116,58 @@ def cart_detail(request, code):
     return render(request, 'front/carts/detail.html', context)
 
 
+#---------Product_section------------
+@login_required(login_url='auth:login')
+def product_detail(request,code):
+    product = models.Product.objects.get(code=code)
+    products = models.Product.objects.all()
+    reviews = models.Review.objects.filter(product=product)
+    images = models.ProductImg.objects.filter(product=product)
+    mark = 0
+
+    for i in reviews:
+        mark += i.mark
+
+    mark = int(mark/len(reviews)) if reviews else 0
+    context = {
+        'product':product,
+        'products':products,
+        'mark':mark,
+        'rating':range(1,6),
+        'images':images,
+        'reviews':reviews,
+    }
+    return render(request, 'front/product/detail.html',context)
+
+
+@login_required(login_url='auth:login')
+def product_list(request,code=None):
+    if code:
+        queryset = models.Product.objects.filter(category__code=code)
+    else:
+        queryset = models.Product.objects.all()
+    categories = models.Category.objects.all()
+    context = {
+        'queryset':queryset,
+        'categories':categories,
+        }
+    return render(request, 'front/category/product_list.html',context)
+
 @login_required(login_url='auth:login')
 def product_order(request):
-    cart = models.Cart.objects.get(user=request.user, is_active=True)
+    cart = models.Cart.objects.get(user=request.user, status=1)
+    cart_product = models.CartProduct.objects.filter(cart=cart)
 
-    cart.is_active = False
+    for product in cart_product:
+        product.product.quantity -= product.count
+        product.product.save()
+
+    cart.status = 2
     cart.save()
-
     return redirect('front:carts')
 
 
+#---------Wishlist_section------------
 @login_required(login_url='auth:login')
 def wishlist(request):
     queryset = models.WishList.objects.filter(user=request.user)
@@ -167,11 +186,22 @@ def add_wishlist(request, code):
         wishlist.delete()
     else:
         wishlist = models.WishList.objects.create(product=product, user=request.user)
-    return redirect('front:wishlist')
+    return redirect('front:index')
+
 
 @login_required(login_url='auth:login')
 def remove_wishlist(request, code):
     wishlist = get_object_or_404(models.WishList, product__code=code, user=request.user)
     wishlist.delete()
-    return redirect('front:wishlist')
+    return redirect('front:index')
+
+
+#---------Review_section------------
+@login_required(login_url='auth:login')
+def add_review(request, code):
+    product = models.Product.objects.get(code=code)
+    review = models.Review.objects.create(product=product, user=request.user, mark=request.POST.get('mark'))
+    review.save()
+    return redirect('front:cart_detail', code)
+
 

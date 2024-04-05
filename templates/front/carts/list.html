@@ -38,7 +38,7 @@
                                                                 <th>DATE</th>
                                                                 <th>PRICE</th>
                                                                 <th>TOTAL</th>
-                                                                <th></th>
+                                                                <th>STATUS</th>
                                                             </tr>
                                                             {% for q in queryset %}
                                                                 <tr>
@@ -46,7 +46,14 @@
                                                                     <td>{{q.order_date}}</td>
                                                                     <td>{{q.price}}</td>
                                                                     <td>{{q.total}}</td>
-                                                                    <td><a href="{% url 'front:cart_detail' q.code %}" class="btn btn-dark"><span>View</span></a>
+                                                                    <td>
+                                                                        {% if q.status == 2 %}
+                                                                        <a href="{% url 'front:cart_detail' q.code %}" class="btn btn-warning"><span>Yo'lda</span></a>
+                                                                        {% elif q.status == 3 %}
+                                                                        <a href="{% url 'front:cart_detail' q.code %}" class="btn btn-danger"><span>Qaytarilgan</span></a>
+                                                                        {% else %}
+                                                                        <a href="{% url 'front:cart_detail' q.code %}" class="btn btn-success"><span>Qabul qilingan</span></a>
+                                                                        {% endif %}
                                                                     </td>
                                                                 </tr>
                                                             {% endfor %}

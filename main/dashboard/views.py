@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from main import models
 from main.funcs import staff_required
+from itertools import chain
 
 @staff_required
 def index(request):
@@ -175,15 +176,14 @@ def product_video_delete(request, id):
     return redirect('dashboard:product_update',product_video.product_id)
 
 #-------ENTER_PRODUCT-----------
+
 @staff_required
 def create_enter_product(request):
     products = models.Product.objects.all()
     if request.method == 'POST':
-        # Get product and quantity, handling potential errors
         product = request.POST.get('code')
         quantity = request.POST.get('quantity')
 
-        # Validate product code and quantity
         if not product or not quantity:
             return redirect('dashboard:create_enter_product')
 
@@ -193,7 +193,6 @@ def create_enter_product(request):
         except (models.ObjectDoesNotExist, ValueError):
             return redirect('dashboard:create_enter_product')
 
-        # Create enter product record on success
         models.EnterProduct.objects.create(
             product=product,
             quantity=quantity
@@ -232,7 +231,7 @@ def list_enter_product(request):
 def product_history(request,code):
     queryset = models.EnterProduct.objects.filter(product__code=code)
     outs = models.CartProduct.objects.filter(product__code = code, cart__is_active=False)
-    history = queryset.union(outs)
+    history = list(chain(queryset, outs))
     date = sorted(history, key=lambda x: x.created_at)
     context = {'history':date}
     return render(request, 'dashboard/product/enter_product_history.html', context)

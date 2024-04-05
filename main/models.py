@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from random import sample
 import string
+from datetime import datetime
 
 
 
@@ -98,8 +99,29 @@ class Review(models.Model):
 
 class Cart(CodeGenerate):
     user = models.ForeignKey(User, on_delete=models.SET_NULL,null=True)
-    is_active = models.BooleanField(default=True)
+    status = models.IntegerField(
+    choices=(
+        (1, 'No Faol'),
+        (2, 'Yo`lda'),
+        (3, 'Qaytarilgan'),
+        (4, 'Qabul qilingan'),
+    ),
+    null=True,
+    blank=True
+)
+
     order_date = models.DateTimeField(null=True, blank=True)
+
+
+    def __str__(self):
+        return f'{self.user.username} - {self.code}'
+    
+    def save(self, *args, **kwargs):
+        if self.pk and self.status != 1 and Cart.objects.filter(pk=self.pk, status=1).exists():
+            self.order_date = datetime.now()
+        super().save(*args, **kwargs)
+
+
 
     @property
     def total(self):
