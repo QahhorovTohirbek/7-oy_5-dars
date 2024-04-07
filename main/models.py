@@ -78,7 +78,7 @@ class ProductVideo(models.Model):
     link = models.URLField(null=True, blank=True)
 
 
-class Review(models.Model):
+class Review(CodeGenerate):
     mark = models.IntegerField()
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)

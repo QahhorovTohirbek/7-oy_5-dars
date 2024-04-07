@@ -146,10 +146,8 @@ def product_list(request,code=None):
         queryset = models.Product.objects.filter(category__code=code)
     else:
         queryset = models.Product.objects.all()
-    categories = models.Category.objects.all()
     context = {
         'queryset':queryset,
-        'categories':categories,
         }
     return render(request, 'front/category/product_list.html',context)
 
@@ -200,8 +198,15 @@ def remove_wishlist(request, code):
 @login_required(login_url='auth:login')
 def add_review(request, code):
     product = models.Product.objects.get(code=code)
-    review = models.Review.objects.create(product=product, user=request.user, mark=request.POST.get('mark'))
-    review.save()
-    return redirect('front:cart_detail', code)
+    if request.method == 'POST':
+        review = models.Review.objects.create(
+            product=product,
+            user=request.user,
+            mark=request.POST.get('review')  
+        )
+        review.save()
+        return redirect('front:cart_detail', code)  
+    else:
+        return render(request, 'front/carts/detail.html', {'product': product})
 
 

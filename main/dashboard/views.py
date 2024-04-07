@@ -9,8 +9,6 @@ def index(request):
     return render(request, 'dashboard/index.html', context)
 
 # ---------CATEGORY-------------
-
-
 @staff_required
 def category_list(request):
     queryset = models.Category.objects.all()
@@ -44,17 +42,27 @@ def category_delete(request, code):
     queryset.delete()
     return redirect('dashboard:category_list')
 
+
 # ---------PRODUCT----------------
-
-
 @staff_required
 def product_list(request):
     categories = models.Category.objects.all()
     category_code = request.GET.get('category_code')
-    if category_code and category_code != '0':
-        queryset = models.Product.objects.filter(category__code=category_code)
-    else:
-        queryset = models.Product.objects.all()
+    if category_code:
+        filter_items = {}
+        for key, value in request.GET.items():
+            if value and not value == '0':
+                if key == 'start_date':
+                    key = 'date__gte'
+                elif key == 'end_date':    
+                    key = 'date__lte'
+                elif key == 'name':
+                    key = 'product__name__icontains'
+                filter_items[key] = value
+
+        enter = models.EnterProduct.objects.filter(**filter_items)
+    queryset = models.Product.objects.all()
+
     context = {
           'queryset':queryset,
           'categories':categories,
@@ -175,8 +183,8 @@ def product_video_delete(request, id):
     product_video.delete()
     return redirect('dashboard:product_update',product_video.product_id)
 
-#-------ENTER_PRODUCT-----------
 
+#-------ENTER_PRODUCT-----------
 @staff_required
 def create_enter_product(request):
     products = models.Product.objects.all()

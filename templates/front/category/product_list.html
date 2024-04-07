@@ -8,12 +8,12 @@
             <div class="row h-100">
                 <div class="col-lg-12">
                     <div class="breadcrumb-item">
-                        <h2 class="breadcrumb-heading">Shop</h2>
+                        <h2 class="breadcrumb-heading">Do'kon</h2>
                         <ul>
                             <li>
-                                <a href="index.html">Home</a>
+                                <a href="index.html">Bosh sahifa</a>
                             </li>
-                            <li>Shop Default</li>
+                            <li>Do'kon</li>
                         </ul>
                     </div>
                 </div>
@@ -35,19 +35,19 @@
                         </div>
                         <div class="widgets-area">
                             <div class="widgets-item pt-0">
-                                <h2 class="widgets-title mb-4">Categories</h2>
+                                <h2 class="widgets-title mb-4">Kategoriyalar</h2>
                                 <ul class="widgets-category">
                                     <li>
                                         <a href="{% url 'front:all_product_list'%}">
                                             <i class="fa fa-chevron-right"></i>
-                                            All <span>(65)</span>
+                                            All <span>()</span>
                                         </a>
                                     </li>
-                                    {% for category in categories %}
+                                    {% for q in queryset %}
                                     <li>
-                                        <a href="{% url 'front:product_list' category.code %}">
+                                        <a href="{% url 'front:product_list' q.category.code %}">
                                             <i class="fa fa-chevron-right"></i>
-                                            {{ category.name }} <span>({{queryset.quantity}})</span>
+                                            {{ q.category.name }} <span>({{q.quantity}})</span>
                                         </a>
                                     </li>
                                     {% endfor %}
@@ -59,10 +59,10 @@
                                 <img src="assets/images/sidebar/banner/1-270x300.jpg" alt="Banner Image">
                             </div>
                             <div class="banner-content text-position-center">
-                                <span class="collection">New Collection</span>
+                                <span class="collection">Yangi kolleksiya</span>
                                 <h3 class="title">Plant Port</h3>
                                 <div class="button-wrap">
-                                    <a class="btn btn-custom-size sm-size btn-pronia-primary" href="#">Shop Now</a>
+                                    <a class="btn btn-custom-size sm-size btn-pronia-primary" href="#">Hoziroq haridni boshlang</a>
                                 </div>
                             </div>
                         </div>
@@ -72,7 +72,7 @@
                     <div class="product-topbar">
                         <ul>
                             <li class="page-count">
-                                <span>12</span> Product Found of <span>30</span>
+                                <span>12</span> dan <span>30</span> gacha mahsulotlar topildi
                             </li>
                             <li class="product-view-wrap">
                                 <ul class="nav" role="tablist">
@@ -103,8 +103,8 @@
                     <div class="tab-content">
                         <div class="tab-pane fade show active" id="grid-view" role="tabpanel" aria-labelledby="grid-view-tab">
                             <div class="product-grid-view row g-y-20">
-                                {% for q in queryset %}
                                 <div class="col-md-4 col-sm-6">
+                                    {% for q in queryset %}
                                     <div class="product-item">
                                         <div class="product-img">
                                             <a href="{% url 'front:product_detail' q.code %}">
@@ -152,8 +152,8 @@
                                                 </ul>
                                         </div>
                                     </div>
+                                    {% endfor %}
                                 </div>
-                                {% endfor %}
                             </div>
                         </div>
                         <div class="tab-pane fade" id="list-view" role="tabpanel" aria-labelledby="list-view-tab">

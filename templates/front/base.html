@@ -136,24 +136,25 @@
                             <div class="main-menu position-relative">
                                 <nav class="main-nav">
                                     <ul>
-                                        <li class="drop-holder">
-                                            <a href="{% url 'front:index'%}">Home</a>
-                                        </li>
-                                        <li class="megamenu-holder">
-                                            <a href="">Shop</a>
-                                        </li>
-                                        </li>
-                                        <li class="drop-holder">
-                                            <a href="blog.html">Blog</a>
+                                        <li>
+                                            <a href="{% url 'front:index'%}">Bosh sahifa</a>
                                         </li>
                                         <li>
-                                            <a href="about.html">About Us</a>
+                                            <a href="">Mahsulotlar</a>
                                         </li>
                                         <li class="drop-holder">
-                                            <a href="#">Pages</a>
+                                            <a href="{% url 'front:index' %}">Kategoriyalar</a>
+                                            <ul class="drop-menu">
+                                                <li>
+                                                    <a href="{% url 'front:all_product_list' %}">Barchachasi</a>
+                                                </li>
+                                                {% for product in products %}
+                                                    <li><a href="{% url 'front:product_list' product.category.code %}">{{ product.category.name }}</a></li>
+                                                {% endfor %}
+                                            </ul>
                                         </li>
                                         <li>
-                                            <a href="contact.html">Contact Us</a>
+                                            <a href="about.html">Biz haqimizda</a>
                                         </li>
                                     </ul>
                                 </nav>

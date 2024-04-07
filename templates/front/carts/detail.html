@@ -137,32 +137,10 @@
       </div>
     </div>
   </div>
-  <div class="modal quick-view-modal fade" id="izohModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="izohModal" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered d-flex justify-content-center">
-      <div class="modal-content" style="width: 630px; height: 480px;">
-        <div class="modal-header">
-          <h5 class="modal-title" id="izohModal">Izohni yuborish</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-tippy="Close" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="sharpborder">
-          </button>
-        </div>
-        
-        <div class="modal-body">
-          <div class="modal-wrap row">
-            <h5>Review: </h5>
-            <span style="margin-bottom:20px;">
-              {% csrf_token %}
-              <textarea name="review" id="" cols="30" rows="10" style="width: 400px; height: 100px;"></textarea>
-            </span>
-            
-            {% for product in products %}
-              <div class="product-review">  <a href="{% url 'front:add_review' product.code %}" class="btn btn-secondary" id="izoh-yozish"> Yuborish </a>
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+
+
+    
+  
   
   
 
