@@ -2,10 +2,33 @@ from django.shortcuts import render, redirect
 from main import models
 from main.funcs import staff_required
 from itertools import chain
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+
+
+
+def paginator_page(List, num, request):
+    paginator = Paginator(List, num)
+    pages = request.GET.get('page')
+    try:
+        page = paginator.page(pages)
+    except PageNotAnInteger:
+        page = paginator.page(1)
+    
+    except EmptyPage:
+        page = paginator.page(paginator.num_pages)
+    return page
+
 
 @staff_required
 def index(request):
-    context = {}
+    categories = models.Category.objects.all().count()
+    products = models.Product.objects.all().count()
+    users = models.User.objects.all().count()
+    context = {
+        'categories':categories,
+        'products':products,
+        'users':users
+    }
     return render(request, 'dashboard/index.html', context)
 
 # ---------CATEGORY-------------
@@ -13,7 +36,7 @@ def index(request):
 def category_list(request):
     queryset = models.Category.objects.all()
     context = {
-        'queryset':queryset
+        'queryset':paginator_page(queryset, 3, request)
         }
     return render(request, 'dashboard/category/list.html', context)
 
@@ -64,7 +87,7 @@ def product_list(request):
     queryset = models.Product.objects.all()
 
     context = {
-          'queryset':queryset,
+          'queryset':paginator_page(queryset, 5, request),
           'categories':categories,
           'category_code':category_code,
     }
