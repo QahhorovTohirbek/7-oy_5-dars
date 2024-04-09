@@ -43,11 +43,11 @@
                                             All <span>()</span>
                                         </a>
                                     </li>
-                                    {% for q in queryset %}
+                                    {% for category in caregories %}
                                     <li>
-                                        <a href="{% url 'front:product_list' q.category.code %}">
+                                        <a href="{% url 'front:product_list' category.code %}">
                                             <i class="fa fa-chevron-right"></i>
-                                            {{ q.category.name }} <span>({{q.quantity}})</span>
+                                            {{ category.name }} <span>({{queryset.quantity}})</span>
                                         </a>
                                     </li>
                                     {% endfor %}
@@ -76,13 +76,13 @@
                             </li>
                             <li class="product-view-wrap">
                                 <ul class="nav" role="tablist">
-                                    <li class="grid-view" role="presentation">
-                                        <a class="active" id="grid-view-tab" data-bs-toggle="tab" href="#grid-view" role="tab" aria-selected="true">
+                                    <li class="nav-item grid-view" role="presentation">
+                                        <a class="nav-link active" id="grid-view-tab" data-bs-toggle="tab" href="#grid-view" role="tab" aria-selected="true">
                                             <i class="fa fa-th"></i>
                                         </a>
                                     </li>
-                                    <li class="list-view" role="presentation">
-                                        <a id="list-view-tab" data-bs-toggle="tab" href="#list-view" role="tab" aria-selected="true">
+                                    <li class="nav-item list-view" role="presentation">
+                                        <a class="nav-link" id="list-view-tab" data-bs-toggle="tab" href="#list-view" role="tab" aria-selected="false">
                                             <i class="fa fa-th-list"></i>
                                         </a>
                                     </li>
@@ -103,8 +103,8 @@
                     <div class="tab-content">
                         <div class="tab-pane fade show active" id="grid-view" role="tabpanel" aria-labelledby="grid-view-tab">
                             <div class="product-grid-view row g-y-20">
+                                {% for q in queryset %}
                                 <div class="col-md-4 col-sm-6">
-                                    {% for q in queryset %}
                                     <div class="product-item">
                                         <div class="product-img">
                                             <a href="{% url 'front:product_detail' q.code %}">
@@ -150,61 +150,16 @@
                                                     {% endif %}
                                                     {% endfor %}
                                                 </ul>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="tab-pane fade" id="list-view" role="tabpanel" aria-labelledby="list-view-tab">
-                            <div class="product-list-view row g-y-30">
-                                {% for q in queryset %}
-                                <div class="col-12">
-                                    <div class="product-item">
-                                        <div class="product-img">
-                                            <a href="{% url 'front:product_detail' q.code %}">
-                                                <img class="primary-img" src="{{ q.banner_img.url }}" alt="Product Images">
-                                                <img class="secondary-img" src="{{ q.banner_img.url }}" alt="Product Images">
-                                            </a>
-                                        </div>
-                                        <div class="product-content">
-                                            <a class="product-name" href="{% url 'front:product_detail' q.code %}">{{ q.name }}</a>
-                                            <div class="price-box pb-1">
-                                                <span class="new-price">{{ q.price }}</span>
-                                            </div>
-                                            <div class="rating-box">
-                                                <ul>
-                                                    <li><i class="fa fa-star"></i></li>
-                                                    <li><i class="fa fa-star"></i></li>
-                                                    <li><i class="fa fa-star"></i></li>
-                                                    <li><i class="fa fa-star"></i></li>
-                                                    <li><i class="fa fa-star"></i></li>
-                                                </ul>
-                                            </div>
-                                            <p class="short-desc mb-0">{{ q.body }}</p>
-                                            <div class="product-add-action">
-                                                <ul>
-                                                    <li>
-                                                        <a href="{% url 'front:add_wishlist' q.code %}" data-tippy="Add to wishlist" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="sharpborder">
-                                                            <i class="pe-7s-like"></i>
-                                                        </a>
-                                                    </li>
-                                                    <li class="quuickview-btn" data-bs-toggle="modal" data-bs-target="#quickModal">
-                                                        <a href="#" data-tippy="Quickview" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="sharpborder">
-                                                            <i class="pe-7s-look"></i>
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="{% url 'front:add_cart' q.code %}" data-tippy="Add to cart" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="sharpborder">
-                                                            <i class="pe-7s-cart"></i>
-                                                        </a>
-                                                    </li>
-                                                </ul>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 {% endfor %}
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="list-view" role="tabpanel" aria-labelledby="list-view-tab">
+                            <div class="product-list-view row g-y-30">
+                                <!-- List view content goes here -->
                             </div>
                         </div>
                     </div>

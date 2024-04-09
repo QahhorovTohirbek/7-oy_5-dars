@@ -3,7 +3,8 @@ from django.contrib.auth.models import AbstractUser
 from random import sample
 import string
 from datetime import datetime
-
+import os
+from django.conf import settings
 
 
 class CodeGenerate(models.Model):
@@ -65,6 +66,14 @@ class Product(CodeGenerate):
 
     def stoct_status(self):
         return bool(self.quantity)
+    
+    def delete(self, *args, **kwargs):
+        file_path = os.path.join(settings.MEDIA_ROOT, self.banner_img.name)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            super().delete(*args, **kwargs)
+
+
 
 
 class ProductImg(models.Model):

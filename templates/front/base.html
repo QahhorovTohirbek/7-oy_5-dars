@@ -148,8 +148,8 @@
                                                 <li>
                                                     <a href="{% url 'front:all_product_list' %}">Barchachasi</a>
                                                 </li>
-                                                {% for product in products %}
-                                                    <li><a href="{% url 'front:product_list' product.category.code %}">{{ product.category.name }}</a></li>
+                                                {% for category in caregories %}
+                                                    <li><a href="{% url 'front:product_list' category.code %}">{{ category.name }}</a></li>
                                                 {% endfor %}
                                             </ul>
                                         </li>

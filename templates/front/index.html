@@ -61,14 +61,31 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <ul class="nav product-tab-nav tab-style-1" id="myTab" role="tablist">
-                            {% for category in categories %}
-                            <li class="nav-item" role="presentation">
-                                <a href="{% url 'front:product_list' category.code %}">
-                                    {{category.name}}
-                                </a>
-                            </li>
-                            {% endfor %}
+                            {% if categories.paginator.num_pages > 1 %}
+                                {% if categories.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ categories.previous_page_number }}" aria-label="Previous">&laquo;</a>
+                                    </li>
+                                {% endif %}
+                            {% endif %}
+                                {% for category in categories %}
+                                    <li class="nav-item" role="presentation">
+                                        <a href="{% url 'front:product_list' category.code %}">
+                                            {{ category.name }}
+                                        </a>
+                                    </li>
+                                {% endfor %}
+
+                            {% if categories.paginator.num_pages > 1 %}
+                                {% if categories.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ categories.next_page_number }}" aria-label="Next">&raquo;</a>
+                                    </li>
+                                {% endif %}
+                            {% endif %}
                         </ul>
+                        
+                        
                         <div class="tab-content" id="myTabContent">
                             <div class="tab-pane fade show active" id="featured" role="tabpanel" aria-labelledby="featured-tab">
                                 <div class="product-item-wrap row">
@@ -103,6 +120,7 @@
                                                                 <i class="pe-7s-cart"></i>
                                                             </a>
                                                         </li>
+                                                        
                                                     </ul>
                                                 </div>
                                             </div>
@@ -126,29 +144,31 @@
                                         </div>
                                     </div>
                                     {% endfor %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Begin Brand Area -->
-        <div class="brand-area section-space-bottom-100">
-            <div class="container">
-                <div class="brand-bg" data-bg-image="{% static 'front/images/brand/bg/1-1170x300.jpg' %}">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="swiper-container brand-slider">
-                                <div class="swiper-wrapper">
-                                    {% for product in products %}
-                                    <div class="swiper-slide">
-                                        <a class="brand-item" href="{% url 'front:product_detail' product.code %}">
-                                            <img src="{{product.banner_img.url}}" alt="Brand Image">
-                                        </a>
+                                    {% if products.paginator.num_pages > 1 %}
+                                    <div class="pagination-area">
+                                        <nav aria-label="Page navigation example">
+                                            <ul class="pagination justify-content-center">
+                                                {% if products.has_previous %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page={{products.previous_page_number }}" aria-label="Oldingisi">&laquo;</a>
+                                                </li>
+                                                {% endif %}
+                                                {% for num in products.paginator.page_range %}
+                                                {% if num == products.number %}
+                                                <li class="page-item active"><a class="page-link" href="#" tabindex="-1">{{ num }}</a></li>
+                                                {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+                                                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                                                {% endif %}
+                                                {% endfor %}
+                                                {% if products.has_next %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page={{products.next_page_number }}" aria-label="Keyingisi">&raquo;</a>
+                                                </li>
+                                                {% endif %}
+                                            </ul>
+                                        </nav>
                                     </div>
-                                    {% endfor %}
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -156,7 +176,7 @@
                 </div>
             </div>
         </div>
-        <!-- Brand Area End Here -->
+        
         {% endblock content %}
 
         

@@ -1,9 +1,24 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from main import models
-
-
 from django.shortcuts import redirect
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+
+
+#---------Paginator_section------------
+def paginator_page(List, num, request):
+    paginator = Paginator(List, num)
+    pages = request.GET.get('page')
+    try:
+        page = paginator.page(pages)
+    except PageNotAnInteger:
+        page = paginator.page(1)
+    
+    except EmptyPage:
+        page = paginator.page(paginator.num_pages)
+    return page
+
+
 
 def index(request):
     if not request.user.is_authenticated:
@@ -29,8 +44,8 @@ def index(request):
      
     mark = int(mark/len(reviews)) if reviews else 0
     context = {
-        'categories':categories,
-        'products':result,
+        'categories':paginator_page(categories, 3, request),
+        'products':paginator_page(result, 4, request),
         'wishlist':wishlist,
         'rating':range(1,6),
         'mark':mark,
@@ -146,8 +161,10 @@ def product_list(request,code=None):
         queryset = models.Product.objects.filter(category__code=code)
     else:
         queryset = models.Product.objects.all()
+    caregories = models.Category.objects.all()
     context = {
         'queryset':queryset,
+        'caregories':caregories,
         }
     return render(request, 'front/category/product_list.html',context)
 
