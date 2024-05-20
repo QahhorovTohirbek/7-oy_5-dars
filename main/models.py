@@ -94,17 +94,23 @@ class Review(CodeGenerate):
     text = models.TextField()
 
     def save(self, *args, **kwargs):
+        if self.mark < 0:
+            self.mark = 0
+        elif self.mark > 5:
+            self.mark = 5
+
         if self.pk:
             obj = Review.objects.filter(product=self.product, user=self.user).exclude(pk=self.pk).first()
         else:
             obj = Review.objects.filter(product=self.product, user=self.user).first()
-        
+
         if obj:
             obj.mark = self.mark
             obj.text = self.text
-            obj.save() 
+            obj.save()
         else:
             super().save(*args, **kwargs)
+
 
 class Cart(CodeGenerate):
     user = models.ForeignKey(User, on_delete=models.SET_NULL,null=True)

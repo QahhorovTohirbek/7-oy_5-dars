@@ -3,6 +3,11 @@ from django.contrib.auth.decorators import login_required
 from main import models
 from django.shortcuts import redirect
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from io import BytesIO
+
 
 
 #---------Paginator_section------------
@@ -122,11 +127,15 @@ def active_cart(request):
 
 @login_required(login_url='auth:login')
 def cart_detail(request, code):
+    carts = models.Cart.objects.filter(user=request.user, status=4)
     cart = models.Cart.objects.get(code=code)
     queryset = models.CartProduct.objects.filter(cart=cart)
+    yolda = models.Cart.objects.filter(status = 2)
     context = {
         'cart': cart,
-        'queryset':queryset
+        'queryset':queryset,
+        'yolda':yolda,
+        'carts':carts,
         }
     return render(request, 'front/carts/detail.html', context)
 
@@ -182,6 +191,20 @@ def product_order(request):
     return redirect('front:carts')
 
 
+@login_required(login_url='auth:login')
+def product_return(request, code):
+    cart = models.Cart.objects.get(user=request.user, code=code)
+    cart_product = models.CartProduct.objects.filter(cart=cart)
+
+    for product in cart_product:
+        product.product.quantity += product.count
+        product.product.save()
+
+    cart.status = 3
+    cart.save()
+    return redirect('front:carts')
+
+
 #---------Wishlist_section------------
 @login_required(login_url='auth:login')
 def wishlist(request):
@@ -215,15 +238,47 @@ def remove_wishlist(request, code):
 @login_required(login_url='auth:login')
 def add_review(request, code):
     product = models.Product.objects.get(code=code)
+    print(request)
     if request.method == 'POST':
         review = models.Review.objects.create(
             product=product,
             user=request.user,
-            mark=request.POST.get('review')  
+            mark=request.POST.get('mark'),  
+            text=request.POST.get('text')  
         )
         review.save()
-        return redirect('front:cart_detail', code)  
+        return redirect('front:carts')  
     else:
         return render(request, 'front/carts/detail.html', {'product': product})
+    
+
+def download_pdf(request, code):
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+    carts = models.Cart.objects.filter(code=code, user=request.user, status=4)
+    cart_p = models.CartProduct.objects.filter(cart__in=carts)
+
+    # Initial vertical position for the content
+    y_position = height - 100
+
+   
+
+    # Loop through cart products and draw product information
+    for item in cart_p:
+        product_name = item.product.name
+        product_price = item.product.price
+        p.drawString(100, y_position, f"Product name: {product_name}")
+        y_position -= 20
+        p.drawString(100, y_position, f"Product price: {product_price}")
+        y_position -= 40 
+    p.showPage()
+    p.save()
+    pdf = buffer.getvalue()
+    buffer.close()
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attenchment; filename = "check.pdf"'
+    response.write(pdf)
+    return response
 
 

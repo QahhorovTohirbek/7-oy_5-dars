@@ -3,7 +3,7 @@
 
 {% block content %}
 <main class="main-content">
-    <div class="breadcrumb-area breadcrumb-height" data-bg-image="assets/images/breadcrumb/bg/1-1-1919x388.jpg" style="background-image: url(&quot;assets/images/breadcrumb/bg/1-1-1919x388.jpg&quot;);">
+    <div class="breadcrumb-area breadcrumb-height" data-bg-image="{% static 'images/breadcrumb/bg/1-1-1919x388.jpg' %}">
         <div class="container h-100">
             <div class="row h-100">
                 <div class="col-lg-12">
@@ -11,7 +11,7 @@
                         <h2 class="breadcrumb-heading">Cart Page</h2>
                         <ul>
                             <li>
-                                <a href="index.html">Home</a>
+                                <a href="{% url 'front:index' %}">Home</a>
                             </li>
                             <li>Cart Page</li>
                         </ul>
@@ -29,22 +29,29 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th class="product_remove">remove</th>
+                                        {% if cart.status == 1 %}
+                                        <th class="product_remove">remove</th> 
+                                        {% endif %}
                                         <th class="product-thumbnail">image</th>
                                         <th class="cart-product-name">Product</th>
                                         <th class="product-price">Unit Price</th>
                                         <th class="product-quantity">Quantity</th>
                                         <th class="product-subtotal">Total</th>
+                                        {% if cart.status == 4 %}
+                                        <th class="product-review">Comment</th> 
+                                        {% endif %}
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for i in queryset %}
-                                    <tr>
+                                    <tr> 
+                                        {% if cart.status == 1 %}
                                         <td class="product_remove">
                                             <a href="{% url 'front:remove_cart' i.product.code %}">
                                                 <i class="pe-7s-close" data-tippy="Remove" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="sharpborder" tabindex="0"></i>
                                             </a>
                                         </td>
+                                        {% endif %}
                                         <td class="product-thumbnail">
                                             <a href="#">
                                                 <img src="{{i.product.banner_img.url}}" alt="Cart Thumbnail" style="width: 100px;">
@@ -61,13 +68,15 @@
                                                     <input style="width: 50px; text-align: center;" class="cart-plus-minus-box" name="quantity" value="{{ i.count }}" type="number">
                                                     <button style="background-color: #fff; border: 1px solid #ccc; color: #333; cursor: pointer; padding: 5px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;" type="submit" class="inc qtybutton" name="action" value="increase"><i style="font-size: 14px;" class="fa fa-plus"></i></button>
                                                 </div>
-                                                
                                             </form>
                                         </td>
                                         {% else %}
-                                        <td class="product-subtotal"><span class="amount">{{i.count}}</span></td>
+                                        <td class="product-quantity"><span class="amount">{{i.count}}</span></td>
                                         {% endif %}
                                         <td class="product-subtotal"><span class="amount">{{i.price}}</span></td>
+                                        {% if cart.status == 4 %}
+                                        <td class="product-review"><button class="btn btn-dark" data-bs-target="#izohModal{{i.product.code}}" data-bs-toggle="modal">Comment</button></td>
+                                        {% endif %}
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -78,34 +87,43 @@
                             <div class="col-12">
                                 <div class="coupon-all">
                                     <div class="coupon2" data-bs-target='#quickModal' data-bs-toggle='modal'>
-                                        <a class="btn btn-dark" id='buyurtma-berish'> Buyurtma berish </a>
+                                        <a class="btn btn-dark" id='buyurtma-berish'>Place Order</a>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        {% elif cart.status == 4 %}
+                        
+                        {% elif cart.status == 2 %}
                         <div class="row">
                             <div class="col-12">
                                 <div class="coupon-all">
-                                    <div class="coupon2" data-bs-target='#izohModal' data-bs-toggle='modal'>
-                                        <a class="btn btn-dark" id='izoh-qoldirish'> Izoh qoldirish </a>
+                                    <div class="coupon2" data-bs-target='#bekorQilishModal' data-bs-toggle='modal'>
+                                        <a class="btn btn-dark" id='izoh-qoldirish'>Cancel Order</a>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         {% endif %}
-                        <div class="row">
-                            <div class="col-md-5 ml-auto">
-                                <div class="cart-page-total">
-                                    <h2>Cart totals</h2>
-                                    <ul>
-                                        <li>Subtotal <span>{{cart.price}}</span></li>
-                                        <li>Total <span>{{cart.total_price}}</span></li>
-                                    </ul>
-                                    <a href="#">Proceed to checkout</a>
-                                </div>
-                            </div>
-                        </div>
+                        {% for cart in carts %}
+                          {% if cart.status == 4 %}
+                          <div class="row">
+                              <div class="col-md-5 ml-auto">
+                                  <div class="cart-page-total">
+                                      <h2>Cart totals</h2>
+                                      <ul>
+                                          <li>Subtotal <span>{{ cart.price }}</span></li>
+                                          <li>Total <span>{{ cart.total_price }}</span></li>
+                                      </ul>
+                                      <a href="{% url 'front:download_pdf' cart.code %}">
+                                          Proceed to checkout
+                                      </a>
+                                  </div>
+                              </div>
+                          </div>
+                          {% endif %}
+                      {% endfor %}
+
+                    
                     </form>
                 </div>
             </div>
@@ -113,37 +131,83 @@
     </div>
 </main>
 
+{% if cart.status == 1 %}
 <div class="modal quick-view-modal fade" id="quickModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="quickModal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered d-flex justify-content-center">
-      <div class="modal-content" style="width: 430px; height: 280px;">
-        <div class="modal-header">
-          <h5 class="modal-title" id="quickModal">Buyurtmani tasdiqlash</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-tippy="Close" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="sharpborder">
-          </button>
-        </div>
-        
-        <div class="modal-body">
-          <div class="modal-wrap row">
-            <h5>Tavarlar soni: <span>{{ queryset|length }}</span></h5><br>
-            
-            <div style="display: flex; justify-content: space-around;">  <button type="button" class="btn btn-danger" data-bs-dismiss="modal" aria-label="Close" data-tippy="Close" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="sharpborder">
-                Ortga
-              </button>
-              
-              <a href="{% url 'front:product_order' %}" class="btn btn-secondary" id="buyurtma-berish"> Tasdiqlash </a>
+        <div class="modal-content" style="width: 430px; height: 280px;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quickModal">Confirm Order</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-tippy="Close" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="sharpborder">
+                </button>
             </div>
-          </div>
+            <div class="modal-body">
+                <div class="modal-wrap row">
+                    <h5>Number of items: <span>{{ queryset|length }}</span></h5><br>
+                    <div style="display: flex; justify-content: space-around;">  
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" aria-label="Close" data-tippy="Close" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="sharpborder">
+                            Back
+                        </button>
+                        <a href="{% url 'front:product_order' %}" class="btn btn-secondary" id="buyurtma-berish">Confirm</a>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
-
-
-    
-  
-  
-  
-
-
+</div>
+{% elif cart.status == 2 %}
+{% for cart_item in yolda %}
+<div class="modal quick-view-modal fade" id="bekorQilishModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="quickModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered d-flex justify-content-center">
+        <div class="modal-content" style="width: 430px; height: 280px;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="quickModal">Cancel Order</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-tippy="Close" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="sharpborder">
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-wrap row">
+                    <h5>Number of items: <span>{{ queryset|length }}</span></h5><br>
+                    <div style="display: flex; justify-content: space-around;">  
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" aria-label="Close" data-tippy="Close" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="sharpborder">
+                            Back
+                        </button>
+                        <a href="{% url 'front:product_return' cart_item.code %}" class="btn btn-secondary" id="buyurtma-berish">Confirm</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% elif cart.status == 4 %}
+{% for i in queryset %}
+<div class="modal quick-view-modal fade" id="izohModal{{i.product.code}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="quickModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered d-flex justify-content-center">
+        <div class="modal-content" style="width: 430px; height: 280px;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="izohModal">Leave a Comment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-tippy="Close" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="sharpborder">
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-wrap row">
+                    <h5>Number of items: <span>{{ i.count }}</span></h5><br>
+                    <form method="POST" action="{% url 'front:add_review' i.product.code %}">
+                        {% csrf_token %}
+                        <input type="number" name="mark">
+                        <textarea type="text" placeholder="Leave a comment for {{i.product.name}}" name="text"></textarea>
+                        <div style="display: flex; justify-content: space-around;">  
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal" aria-label="Close" data-tippy="Close" data-tippy-inertia="true" data-tippy-animation="shift-away" data-tippy-delay="50" data-tippy-arrow="true" data-tippy-theme="sharpborder">
+                                Back
+                            </button>
+                            <button type="submit" class="btn btn-secondary" id="buyurtma-berish">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
 {% endblock content %}
-    
